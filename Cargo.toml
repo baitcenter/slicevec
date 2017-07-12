@@ -4,6 +4,9 @@ version = "0.1.0"
 description = "A vector using an external slice as backing storage"
 keywords = ["vec", "slice", "array", "no_std"]
 categories = ["data-structures"]
+repository = "https://github.com/jonas-schievink/slicevec.git"
+homepage = "https://github.com/jonas-schievink/slicevec"
+documentation = "https://docs.rs/slicevec"
 license = "CC0-1.0"
 authors = ["Jonas Schievink <jonasschievink@gmail.com>"]
 

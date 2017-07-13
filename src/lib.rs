@@ -5,7 +5,7 @@
 use core::borrow::{Borrow, BorrowMut};
 use core::ops::{Deref, DerefMut};
 use core::mem::{swap, replace};
-use core::cmp;
+use core::{cmp, slice};
 
 /// A Vector using a slice for backing storage (passed in at creation time).
 ///
@@ -182,6 +182,27 @@ impl<'a, T> DerefMut for SliceVec<'a, T> {
     }
 }
 
+impl<'a, T: Default> IntoIterator for SliceVec<'a, T> {
+    type Item = T;
+    type IntoIter = IntoIter<'a, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        IntoIter {
+            v: self,
+            next: 0,
+        }
+    }
+}
+
+impl<'a, T> IntoIterator for &'a SliceVec<'a, T> {
+    type Item = &'a T;
+    type IntoIter = slice::Iter<'a, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.as_slice().into_iter()
+    }
+}
+
 // Forward useful `[T]` impls so `SliceVec` is useful in generic contexts.
 // TODO: There are a lot more we can forward. Is this the right way? `Vec<T>` also forwards dozens.
 
@@ -206,6 +227,27 @@ impl<'a, T> Borrow<[T]> for SliceVec<'a, T> {
 impl<'a, T> BorrowMut<[T]> for SliceVec<'a, T> {
     fn borrow_mut(&mut self) -> &mut [T] {
         self.as_mut_slice()
+    }
+}
+
+/// An iterator that moves elements out of a `SliceVec`, replacing them with their default value.
+pub struct IntoIter<'a, T: 'a> {
+    v: SliceVec<'a, T>,
+    next: usize,
+}
+
+// FIXME: this iterator is fused, impl `FusedIterator` once stable
+impl<'a, T: Default> Iterator for IntoIter<'a, T> {
+    type Item = T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.next < self.v.len() {
+            let elem = replace(&mut self.v[self.next], T::default());
+            self.next += 1;
+            Some(elem)
+        } else {
+            None
+        }
     }
 }
 
@@ -349,5 +391,26 @@ mod tests {
         v.push(2).unwrap();
         assert!(v.is_full());
         v.push(3).unwrap_err();
+    }
+
+    #[test]
+    fn iter_with_for() {
+        let mut storage = [0; 5];
+        let mut v = SliceVec::new(&mut storage);
+        v.push(0).unwrap();
+        v.push(1).unwrap();
+        v.push(2).unwrap();
+        v.push(3).unwrap();
+
+        let mut count = 0;
+        for &elem in &v {
+            assert_eq!(elem, count);
+            count += 1;
+        }
+        let mut count = 0;
+        for elem in v {
+            assert_eq!(elem, count);
+            count += 1;
+        }
     }
 }

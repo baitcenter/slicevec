@@ -54,6 +54,14 @@ impl<'a, T> SliceVec<'a, T> {
         self.len == 0
     }
 
+    /// Returns `true` if the backing slice is completely filled.
+    ///
+    /// When this is the case, all operations that insert additional elements into the `SliceVec`
+    /// will fail.
+    pub fn is_full(&self) -> bool {
+        self.len == self.storage.len()
+    }
+
     /// Tries to append an element to the end of this vector.
     ///
     /// If the backing storage is already full, returns `Err(elem)`.
@@ -327,5 +335,19 @@ mod tests {
         assert_eq!(v.as_slice(), &[0, 1, 2, 3]);
 
         v.remove(4);
+    }
+
+    #[test]
+    fn is_full() {
+        let mut storage = [0; 3];
+        let mut v = SliceVec::new(&mut storage);
+        assert!(!v.is_full());
+        v.push(0).unwrap();
+        assert!(!v.is_full());
+        v.push(1).unwrap();
+        assert!(!v.is_full());
+        v.push(2).unwrap();
+        assert!(v.is_full());
+        v.push(3).unwrap_err();
     }
 }

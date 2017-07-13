@@ -2,6 +2,7 @@
 
 #![no_std]
 
+use core::borrow::{Borrow, BorrowMut};
 use core::ops::{Deref, DerefMut};
 use core::mem::replace;
 use core::cmp;
@@ -19,6 +20,7 @@ use core::cmp;
 /// `ArrayVec` type: You have to crate the backing storage yourself, but `SliceVec` works with
 /// arrays of *any* length (unlike `ArrayVec`, which works with a fixed set of lengths, since Rust
 /// doesn't (yet) have integer generics).
+#[derive(Debug)]
 pub struct SliceVec<'a, T: 'a> {
     storage: &'a mut [T],
     len: usize,
@@ -141,6 +143,33 @@ impl<'a, T> Deref for SliceVec<'a, T> {
 
 impl<'a, T> DerefMut for SliceVec<'a, T> {
     fn deref_mut(&mut self) -> &mut [T] {
+        self.as_mut_slice()
+    }
+}
+
+// Forward useful `[T]` impls so `SliceVec` is useful in generic contexts.
+// TODO: There are a lot more we can forward. Is this the right way? `Vec<T>` also forwards dozens.
+
+impl<'a, T> AsRef<[T]> for SliceVec<'a, T> {
+    fn as_ref(&self) -> &[T] {
+        self.as_slice()
+    }
+}
+
+impl<'a, T> AsMut<[T]> for SliceVec<'a, T> {
+    fn as_mut(&mut self) -> &mut [T] {
+        self.as_mut_slice()
+    }
+}
+
+impl<'a, T> Borrow<[T]> for SliceVec<'a, T> {
+    fn borrow(&self) -> &[T] {
+        self.as_slice()
+    }
+}
+
+impl<'a, T> BorrowMut<[T]> for SliceVec<'a, T> {
+    fn borrow_mut(&mut self) -> &mut [T] {
         self.as_mut_slice()
     }
 }

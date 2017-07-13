@@ -233,27 +233,53 @@ mod tests {
 
     #[test]
     fn swap_remove() {
-        let mut storage = [0; 3];
+        let mut storage = [0; 5];
+        let mut v = SliceVec::new(&mut storage);
+        v.push(0).unwrap();
+        v.push(1).unwrap();
+        v.push(2).unwrap();
+        v.push(3).unwrap();
+        assert_eq!(v.as_slice(), &[0, 1, 2, 3]);
+        assert_eq!(v.swap_remove(0), 0);
+        assert_eq!(v.as_slice(), &[3, 1, 2]);
+        assert_eq!(v.swap_remove(2), 2);
+        assert_eq!(v.as_slice(), &[3, 1]);
+        v.push(100).unwrap();
+        v.push(101).unwrap();
+        assert_eq!(v.as_slice(), &[3, 1, 100, 101]);
+        assert_eq!(v.swap_remove(2), 100);
+        assert_eq!(v.as_slice(), &[3, 1, 101]);
+        v.push(102).unwrap();
+        assert_eq!(v.as_slice(), &[3, 1, 101, 102]);
+        assert_eq!(v.swap_remove(1), 1);
+        assert_eq!(v.as_slice(), &[3, 102, 101]);
+    }
 
-        {
-            let mut s = SliceVec::new(&mut storage);
-            assert_eq!(s.len(), 0);
-            assert_eq!(s.capacity(), 3);
+    #[test]
+    #[should_panic]
+    fn swap_remove_empty() {
+        let mut storage = [0; 5];
+        let mut v = SliceVec::new(&mut storage);
+        v.push(7).unwrap();
+        v.clear();
+        assert_eq!(v.as_slice(), &[]);
+        assert!(v.is_empty());
 
-            assert!(s.is_empty());
-            assert_eq!(s.push(0), Ok(()));
-            assert!(!s.is_empty());
-            assert_eq!(s.push(1), Ok(()));
-            assert_eq!(s.push(2), Ok(()));
-            assert_eq!(s.push(3), Err(3));
-            assert_eq!(s.len(), 3);
-            assert_eq!(s.swap_remove(0), 0);
-            assert!(!s.is_empty());
-            assert_eq!(s.len(), 2);
-            assert_eq!(s[0], 2);
-            assert_eq!(s[1], 1);
-            assert_eq!(s.as_slice().len(), 2);
-        }
+        v.swap_remove(0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn swap_remove_out_of_bounds() {
+        let mut storage = [0; 5];
+        let mut v = SliceVec::new(&mut storage);
+        v.push(0).unwrap();
+        v.push(1).unwrap();
+        v.push(2).unwrap();
+        v.push(3).unwrap();
+        assert_eq!(v.as_slice(), &[0, 1, 2, 3]);
+
+        v.swap_remove(4);
     }
 
     #[test]

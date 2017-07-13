@@ -1,6 +1,6 @@
 [package]
 name = "slicevec"
-version = "0.1.0"
+version = "0.1.1"
 description = "A vector using an external slice as backing storage"
 keywords = ["vec", "slice", "array", "no_std"]
 categories = ["data-structures"]

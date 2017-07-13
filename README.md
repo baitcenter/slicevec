@@ -1,6 +1,6 @@
 # The SliceVec crate
 
-[![](http://meritbadge.herokuapp.com/slicevec)](https://crates.io/crates/slicevec) [![Build Status](https://travis-ci.org/jonas-schievink/slicevec.svg?branch=master)](https://travis-ci.org/jonas-schievink/slicevec) [![](https://docs.rs/slicevec/badge.svg)](https://docs.rs/slicevec)
+[![Build Status](https://travis-ci.org/jonas-schievink/slicevec.svg?branch=master)](https://travis-ci.org/jonas-schievink/slicevec) [![](http://meritbadge.herokuapp.com/slicevec)](https://crates.io/crates/slicevec) [![](https://docs.rs/slicevec/badge.svg)](https://docs.rs/slicevec)
 
 **`SliceVec`** provides a dynamically growing vector using an external slice as the backing storage. This means that `SliceVec` is completely allocation-free and can be used in `no_std` environments.
 
